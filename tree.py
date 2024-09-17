@@ -1,5 +1,5 @@
 import os
-import sys
+import argparse
 
 try:
     from colorama import init, Fore, Style
@@ -21,8 +21,10 @@ def get_color(path):
 def reset_color():
     return Style.RESET_ALL if has_colorama else ''
 
-def tree(directory, prefix=''):
+def tree(directory, prefix='', show_hidden=False):
     contents = os.listdir(directory)
+    if not show_hidden:
+        contents = [item for item in contents if not item.startswith('.')]
     contents.sort()
     dir_count = 0
     file_count = 0
@@ -53,7 +55,11 @@ def tree(directory, prefix=''):
     return dir_count, file_count
 
 if __name__ == '__main__':
-    path = sys.argv[1] if len(sys.argv) > 1 else '.'
-    print(path)
-    total_dirs, total_files = tree(path)
+    parser = argparse.ArgumentParser(description='Display directory tree structure')
+    parser.add_argument('path', nargs='?', default='.', help='Path to the directory')
+    parser.add_argument('-a', '--all', action='store_true', help='Show hidden files')
+    args = parser.parse_args()
+
+    print(args.path)
+    total_dirs, total_files = tree(args.path, show_hidden=args.all)
     print(f"\n{total_dirs} directories, {total_files} files")
